@@ -52,13 +52,12 @@ const FEATURED_PROJECTS = [
     id: "cateneo-in-progress",
     name: "Cateneo",
     description:
-      "A Cat Directory for Cateneo a University Organization with Ateneo de Davao University. Currently working on Cateneo as a Full-Stack Developer.",
+      "A Cat Directory for Cateneo, a university organization with Ateneo de Davao University. Currently working on Cateneo as a Full-Stack Developer.",
     language: "Full-Stack Development",
     stargazers_count: 0,
     status: "In Progress",
   },
 ];
-
 
 /* =========================
    STATE
@@ -70,8 +69,11 @@ const state = {
   searchTerm: "",
   bookmarksOnly: false,
   bookmarks: getBookmarks(),
-};
 
+  // Used for GitHub API pagination
+  hasNextPage: false,
+  hasPreviousPage: false,
+};
 
 /* =========================
    DOM ELEMENTS
@@ -91,7 +93,6 @@ const elements = {
   formStatus: document.querySelector("#form-status"),
 };
 
-
 /* =========================
    INITIALIZATION
 ========================= */
@@ -104,9 +105,8 @@ function init() {
   setupContactForm();
 
   renderPage();
-  fetchProjects();
+  fetchProjects(1);
 }
-
 
 /* =========================
    MAIN RENDER FUNCTION
@@ -118,7 +118,6 @@ function renderPage() {
   renderProjects();
   renderPagination();
 }
-
 
 /* =========================
    CLEAN PAGE
@@ -134,7 +133,6 @@ function clearPage() {
   }
 }
 
-
 /* =========================
    STATE HELPERS
 ========================= */
@@ -144,6 +142,10 @@ function setSearchTerm(value) {
   state.currentPage = 1;
 
   renderPage();
+
+  // Search/filtering is performed on the currently loaded projects.
+  // If you want GitHub search across all repositories, that would
+  // require a different GitHub API endpoint.
 }
 
 function setBookmarksOnly(value) {
@@ -154,9 +156,11 @@ function setBookmarksOnly(value) {
 }
 
 function setCurrentPage(page) {
+  if (page < 1) return;
+
   state.currentPage = page;
 
-  renderPage();
+  fetchProjects(page);
 }
 
 function toggleBookmark(projectId) {
@@ -176,7 +180,6 @@ function setProjects(projects) {
 
   renderPage();
 }
-
 
 /* =========================
    LOCAL STORAGE HELPERS
@@ -198,7 +201,6 @@ function saveBookmarks(bookmarks) {
     JSON.stringify([...bookmarks])
   );
 }
-
 
 /* =========================
    PROJECT SELECTORS
@@ -233,7 +235,9 @@ function getVisibleProjects() {
   const pageCount = getPageCount();
 
   // Prevent invalid page numbers
-  if (state.currentPage > Math.max(pageCount, 1)) {
+  if (
+    state.currentPage > Math.max(pageCount, 1)
+  ) {
     state.currentPage = 1;
   }
 
@@ -246,7 +250,6 @@ function getVisibleProjects() {
     start + PROJECTS_PER_PAGE
   );
 }
-
 
 /* =========================
    PROJECT RENDERING
@@ -280,19 +283,21 @@ function renderEmptyState() {
   elements.projectGrid.append(message);
 }
 
-
 /* =========================
    PROJECT CARD
 ========================= */
 
 function createProjectCard(project) {
   const article = document.createElement("article");
+
   article.className = "project-card";
 
   const title = document.createElement("h3");
+
   title.textContent = project.name;
 
   const description = document.createElement("p");
+
   description.textContent =
     project.description ||
     "No description has been added to this repository yet.";
@@ -310,7 +315,6 @@ function createProjectCard(project) {
 
   return article;
 }
-
 
 /* =========================
    PROJECT META
@@ -335,14 +339,13 @@ function createProjectMeta(project) {
     const stars = document.createElement("span");
 
     stars.textContent =
-      `★ ${project.stargazers_count}`;
+      `★ ${project.stargazers_count || 0}`;
 
     meta.append(stars);
   }
 
   return meta;
 }
-
 
 /* =========================
    PROJECT ACTIONS
@@ -372,8 +375,11 @@ function createPrimaryAction(project) {
     const link = document.createElement("a");
 
     link.className = "project-link";
+
     link.href = project.html_url;
+
     link.target = "_blank";
+
     link.rel = "noopener noreferrer";
 
     // GitHub projects → View repository
@@ -395,7 +401,6 @@ function createPrimaryAction(project) {
 
   return status;
 }
-
 
 /* =========================
    BOOKMARK BUTTON
@@ -438,7 +443,6 @@ function createBookmarkButton(project) {
   return button;
 }
 
-
 /* =========================
    PAGINATION
 ========================= */
@@ -446,48 +450,110 @@ function createBookmarkButton(project) {
 function renderPagination() {
   if (!elements.pagination) return;
 
-  const pageCount = getPageCount();
+  elements.pagination.replaceChildren();
 
-  if (pageCount <= 1) return;
+  /*
+    GitHub pagination is handled server-side.
 
-  for (
-    let page = 1;
-    page <= pageCount;
-    page += 1
+    Instead of calculating the number of pages from
+    the currently loaded projects, we show:
+
+    Previous | Current Page | Next
+  */
+
+  if (
+    !state.hasPreviousPage &&
+    !state.hasNextPage
   ) {
-    const button =
+    return;
+  }
+
+  // Previous button
+  if (state.hasPreviousPage) {
+    const previousButton =
       document.createElement("button");
 
-    button.type = "button";
+    previousButton.type = "button";
 
-    button.textContent =
-      String(page);
+    previousButton.textContent = "Previous";
 
-    button.setAttribute(
+    previousButton.setAttribute(
       "aria-label",
-      `Go to projects page ${page}`
+      "Go to previous projects page"
     );
 
-    if (page === state.currentPage) {
-      button.setAttribute(
-        "aria-current",
-        "page"
-      );
-    }
+    previousButton.addEventListener(
+      "click",
+      () => {
+        setCurrentPage(
+          state.currentPage - 1
+        );
 
-    button.addEventListener("click", () => {
-      setCurrentPage(page);
+        elements.projectGrid?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+    );
 
-      elements.projectGrid?.scrollIntoView({
-        behavior: "smooth",
-        block: "start",
-      });
-    });
+    elements.pagination.append(
+      previousButton
+    );
+  }
 
-    elements.pagination.append(button);
+  // Current page indicator
+  const currentPageButton =
+    document.createElement("button");
+
+  currentPageButton.type = "button";
+
+  currentPageButton.textContent =
+    String(state.currentPage);
+
+  currentPageButton.setAttribute(
+    "aria-current",
+    "page"
+  );
+
+  currentPageButton.disabled = true;
+
+  elements.pagination.append(
+    currentPageButton
+  );
+
+  // Next button
+  if (state.hasNextPage) {
+    const nextButton =
+      document.createElement("button");
+
+    nextButton.type = "button";
+
+    nextButton.textContent = "Next";
+
+    nextButton.setAttribute(
+      "aria-label",
+      "Go to next projects page"
+    );
+
+    nextButton.addEventListener(
+      "click",
+      () => {
+        setCurrentPage(
+          state.currentPage + 1
+        );
+
+        elements.projectGrid?.scrollIntoView({
+          behavior: "smooth",
+          block: "start",
+        });
+      }
+    );
+
+    elements.pagination.append(
+      nextButton
+    );
   }
 }
-
 
 /* =========================
    PROJECT EVENTS
@@ -507,23 +573,46 @@ function setupProjectEvents() {
     elements.bookmarksOnlyInput.addEventListener(
       "change",
       (event) => {
-        setBookmarksOnly(event.target.checked);
+        setBookmarksOnly(
+          event.target.checked
+        );
       }
     );
   }
 }
 
-
 /* =========================
    FETCH PROJECTS
 ========================= */
 
-async function fetchProjects() {
+async function fetchProjects(page = 1) {
   if (!elements.projectStatus) return;
 
   try {
+    elements.projectStatus.hidden = false;
+
+    elements.projectStatus.classList.remove(
+      "error"
+    );
+
+    elements.projectStatus.textContent =
+      "Loading projects...";
+
+    /*
+      GitHub pagination
+
+      page=1 → first 6 repositories
+      page=2 → next 6 repositories
+      page=3 → next 6 repositories
+      etc.
+
+      The important part is:
+
+      &page=${page}
+    */
+
     const response = await fetch(
-      "https://api.github.com/users/HanzDr/repos?per_page=10"
+      `https://api.github.com/users/HanzDr/repos?per_page=${PROJECTS_PER_PAGE}&page=${page}`
     );
 
     if (!response.ok) {
@@ -532,28 +621,88 @@ async function fetchProjects() {
       );
     }
 
-    const projects = await response.json();
+    const projects =
+      await response.json();
 
-    // If API returns nothing, use featured projects
-    if (!projects || projects.length === 0) {
-      setProjects(
-        FEATURED_PROJECTS.map((project) => ({
-          ...project,
-          source: "featured",
-        }))
-      );
+    /*
+      If GitHub returns no repositories on this page,
+      use featured projects as fallback.
+    */
 
-      elements.projectStatus.textContent =
-        "No projects found. Showing featured projects instead.";
+    if (
+      !projects ||
+      projects.length === 0
+    ) {
+      if (page === 1) {
+        const fallbackProjects =
+          FEATURED_PROJECTS.map(
+            (project) => ({
+              ...project,
+              source: "featured",
+            })
+          );
+
+        state.currentPage = 1;
+
+        state.hasPreviousPage = false;
+
+        state.hasNextPage = false;
+
+        setProjects(fallbackProjects);
+
+        elements.projectStatus.hidden =
+          false;
+
+        elements.projectStatus.textContent =
+          "No GitHub projects found. Showing featured projects instead.";
+
+        return;
+      }
+
+      /*
+        If a later page is empty, don't move to it.
+        Stay on the current page.
+      */
+
+      state.hasNextPage = false;
+
+      renderPage();
 
       return;
     }
 
-    // Mark fetched projects as coming from GitHub
-    const githubProjects = projects.map((project) => ({
-      ...project,
-      source: "github",
-    }));
+    /*
+      Mark fetched repositories as GitHub projects.
+    */
+
+    const githubProjects =
+      projects.map((project) => ({
+        ...project,
+        source: "github",
+      }));
+
+    /*
+      Update pagination state.
+    */
+
+    state.currentPage = page;
+
+    state.hasPreviousPage =
+      page > 1;
+
+    /*
+      GitHub does not directly tell us whether
+      another page exists.
+
+      If we received a full page of 6 projects,
+      there may be another page.
+
+      If we received fewer than 6,
+      this is the final page.
+    */
+
+    state.hasNextPage =
+      projects.length === PROJECTS_PER_PAGE;
 
     setProjects(githubProjects);
 
@@ -565,22 +714,57 @@ async function fetchProjects() {
       error
     );
 
-    // Use featured projects if GitHub fetch fails
-    setProjects(
-      FEATURED_PROJECTS.map((project) => ({
-        ...project,
-        source: "featured",
-      }))
+    /*
+      If GitHub fails on the first page,
+      use featured projects as fallback.
+    */
+
+    if (page === 1) {
+      state.currentPage = 1;
+
+      state.hasPreviousPage = false;
+
+      state.hasNextPage = false;
+
+      const fallbackProjects =
+        FEATURED_PROJECTS.map(
+          (project) => ({
+            ...project,
+            source: "featured",
+          })
+        );
+
+      setProjects(fallbackProjects);
+
+      elements.projectStatus.hidden =
+        false;
+
+      elements.projectStatus.classList.add(
+        "error"
+      );
+
+      elements.projectStatus.textContent =
+        "Unable to load projects from GitHub. Showing featured projects instead.";
+
+      return;
+    }
+
+    /*
+      If a later page fails, keep the
+      currently displayed projects.
+    */
+
+    elements.projectStatus.hidden =
+      false;
+
+    elements.projectStatus.classList.add(
+      "error"
     );
 
-    elements.projectStatus.hidden = false;
-    elements.projectStatus.classList.add("error");
-
     elements.projectStatus.textContent =
-      "Unable to load projects from GitHub. Showing featured projects instead.";
+      "Unable to load this GitHub projects page.";
   }
 }
-
 
 /* =========================
    NAVIGATION
@@ -594,17 +778,19 @@ function setupNavigation() {
 
   if (!navToggle || !navLinks) return;
 
-  navToggle.addEventListener("click", () => {
-    const isOpen =
-      navLinks.classList.toggle("open");
+  navToggle.addEventListener(
+    "click",
+    () => {
+      const isOpen =
+        navLinks.classList.toggle("open");
 
-    navToggle.setAttribute(
-      "aria-expanded",
-      String(isOpen)
-    );
-  });
+      navToggle.setAttribute(
+        "aria-expanded",
+        String(isOpen)
+      );
+    }
+  );
 }
-
 
 /* =========================
    CURRENT YEAR
@@ -612,13 +798,14 @@ function setupNavigation() {
 
 function setCurrentYear() {
   document
-    .querySelectorAll("[data-current-year]")
+    .querySelectorAll(
+      "[data-current-year]"
+    )
     .forEach((element) => {
       element.textContent =
         new Date().getFullYear();
     });
 }
-
 
 /* =========================
    FORM VALIDATION
@@ -629,11 +816,15 @@ const PH_PHONE_PATTERN =
 
 function validateContactForm(form) {
   const fields = [
-    ...form.querySelectorAll("input, textarea"),
+    ...form.querySelectorAll(
+      "input, textarea"
+    ),
   ];
 
   const results =
-    fields.map((field) => validateField(form, field));
+    fields.map((field) =>
+      validateField(form, field)
+    );
 
   return results.every(Boolean);
 }
@@ -642,7 +833,8 @@ function validateField(form, field) {
   let message = "";
 
   if (field.validity.valueMissing) {
-    message = "This field is required.";
+    message =
+      "This field is required.";
 
   } else if (field.validity.typeMismatch) {
     message =
@@ -662,7 +854,11 @@ function validateField(form, field) {
       "Enter a valid PH mobile number, such as 09171234567.";
   }
 
-  setFieldError(form, field, message);
+  setFieldError(
+    form,
+    field,
+    message
+  );
 
   return !message;
 }
@@ -689,10 +885,14 @@ function setFieldError(
 
 function clearFormErrors(form) {
   const fields =
-    form.querySelectorAll("input, textarea");
+    form.querySelectorAll(
+      "input, textarea"
+    );
 
   fields.forEach((field) => {
-    field.removeAttribute("aria-invalid");
+    field.removeAttribute(
+      "aria-invalid"
+    );
 
     const error =
       form.querySelector(
@@ -705,7 +905,6 @@ function clearFormErrors(form) {
   });
 }
 
-
 /* =========================
    CONTACT FORM EVENTS
 ========================= */
@@ -716,7 +915,9 @@ function setupContactForm() {
     formStatus,
   } = elements;
 
-  if (!contactForm || !formStatus) return;
+  if (!contactForm || !formStatus) {
+    return;
+  }
 
   const fields = [
     ...contactForm.querySelectorAll(
@@ -726,9 +927,15 @@ function setupContactForm() {
 
   // Validate individual fields on blur
   fields.forEach((field) => {
-    field.addEventListener("blur", () => {
-      validateField(contactForm, field);
-    });
+    field.addEventListener(
+      "blur",
+      () => {
+        validateField(
+          contactForm,
+          field
+        );
+      }
+    );
   });
 
   contactForm.addEventListener(
@@ -740,7 +947,8 @@ function setupContactForm() {
 function handleFormSubmit(event) {
   event.preventDefault();
 
-  const form = event.currentTarget;
+  const form =
+    event.currentTarget;
 
   const formStatus =
     elements.formStatus;
@@ -758,7 +966,9 @@ function handleFormSubmit(event) {
       "Please correct the highlighted fields.";
 
     form
-      .querySelector('[aria-invalid="true"]')
+      .querySelector(
+        '[aria-invalid="true"]'
+      )
       ?.focus();
 
     return;
@@ -775,7 +985,6 @@ function handleFormSubmit(event) {
 
   clearFormErrors(form);
 }
-
 
 /* =========================
    START APPLICATION
