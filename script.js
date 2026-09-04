@@ -376,9 +376,12 @@ function createPrimaryAction(project) {
     link.target = "_blank";
     link.rel = "noopener noreferrer";
 
+    // GitHub projects → View repository
+    // Featured projects → Visit website
     link.textContent =
-      project.linkLabel ||
-      "View repository ↗";
+      project.source === "github"
+        ? "View repository ↗"
+        : project.linkLabel || "Visit website ↗";
 
     return link;
   }
@@ -531,9 +534,14 @@ async function fetchProjects() {
 
     const projects = await response.json();
 
-    // If API returns nothing, use fallback data
+    // If API returns nothing, use featured projects
     if (!projects || projects.length === 0) {
-      setProjects([...FEATURED_PROJECTS]);
+      setProjects(
+        FEATURED_PROJECTS.map((project) => ({
+          ...project,
+          source: "featured",
+        }))
+      );
 
       elements.projectStatus.textContent =
         "No projects found. Showing featured projects instead.";
@@ -541,8 +549,13 @@ async function fetchProjects() {
       return;
     }
 
-    // Use fetched projects
-    setProjects(projects);
+    // Mark fetched projects as coming from GitHub
+    const githubProjects = projects.map((project) => ({
+      ...project,
+      source: "github",
+    }));
+
+    setProjects(githubProjects);
 
     elements.projectStatus.hidden = true;
 
@@ -552,8 +565,13 @@ async function fetchProjects() {
       error
     );
 
-    // Use fallback data if fetch fails
-    setProjects([...FEATURED_PROJECTS]);
+    // Use featured projects if GitHub fetch fails
+    setProjects(
+      FEATURED_PROJECTS.map((project) => ({
+        ...project,
+        source: "featured",
+      }))
+    );
 
     elements.projectStatus.hidden = false;
     elements.projectStatus.classList.add("error");
