@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="A student web developer portfolio featuring projects from GitHub.">
+  <title>Home | Alex Developer</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header class="site-header">
+    <nav class="container navbar" aria-label="Main navigation">
+      <a class="brand" href="index.html" aria-label="Alex Developer home">AD<span>.</span></a>
+      <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-menu">
+        <span class="sr-only">Toggle navigation</span><span aria-hidden="true">☰</span>
+      </button>
+      <ul id="primary-menu" class="nav-links">
+        <li><a href="index.html" aria-current="page">Home</a></li>
+        <li><a href="about.html">About Me</a></li>
+        <li><a href="projects.html">Projects</a></li>
+        <li><a href="contact.html">Contact</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <main id="main-content">
+    <section class="hero">
+      <div class="container hero-content">
+        <div>
+          <p class="eyebrow">Hello, I’m Alex</p>
+          <h1>I build clean and accessible experiences for the web.</h1>
+          <p class="hero-copy">I’m a student developer turning thoughtful ideas into responsive, useful websites.</p>
+          <div class="hero-actions">
+            <a class="button" href="projects.html">Explore my projects</a>
+            <a class="button button-secondary" href="contact.html">Contact me</a>
+          </div>
+        </div>
+        <div class="hero-art" aria-hidden="true">
+          <div class="code-window"><span></span><span></span><span></span><p>&lt;ideas&gt;<br>&nbsp;&nbsp;design + code<br>&lt;/ideas&gt;</p></div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section">
+      <div class="container intro-grid">
+        <div>
+          <p class="eyebrow">What I do</p>
+          <h2>Ideas shaped with purpose</h2>
+        </div>
+        <p>I combine semantic HTML, modern CSS, and JavaScript to create interfaces that work smoothly across devices and remain usable for everyone.</p>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="container footer-content">
+      <p>&copy; <span data-current-year></span> Alex Developer</p>
+      <nav aria-label="Footer navigation"><a href="about.html">About</a><a href="projects.html">Projects</a><a href="contact.html">Contact</a></nav>
+    </div>
+  </footer>
+</body>
+</html>

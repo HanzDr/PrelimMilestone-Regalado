@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Browse Alex's public GitHub projects.">
+  <title>Projects | Alex Developer</title>
+  <link rel="stylesheet" href="styles.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <a class="skip-link" href="#main-content">Skip to main content</a>
+  <header class="site-header"><nav class="container navbar" aria-label="Main navigation">
+    <a class="brand" href="index.html" aria-label="Alex Developer home">AD<span>.</span></a>
+    <button class="nav-toggle" type="button" aria-expanded="false" aria-controls="primary-menu"><span class="sr-only">Toggle navigation</span><span aria-hidden="true">☰</span></button>
+    <ul id="primary-menu" class="nav-links"><li><a href="index.html">Home</a></li><li><a href="about.html">About Me</a></li><li><a href="projects.html" aria-current="page">Projects</a></li><li><a href="contact.html">Contact</a></li></ul>
+  </nav></header>
+
+  <main id="main-content">
+    <section class="page-heading"><div class="container"><p class="eyebrow">Selected work</p><h1>Projects and live websites</h1><p>Published websites and live repository data, displayed dynamically with JavaScript.</p></div></section>
+    <section class="section projects-section" aria-labelledby="projects-title">
+      <div class="container">
+        <h2 id="projects-title" class="sr-only">Project gallery</h2>
+        <div class="project-tools">
+          <div class="search-wrap"><label for="project-search">Search projects by name</label><input id="project-search" type="search" placeholder="Try “hello”..." autocomplete="off"></div>
+          <label class="bookmark-filter"><input id="bookmarks-only" type="checkbox"> Bookmarks only</label>
+        </div>
+        <div id="project-status" class="status" role="status" aria-live="polite">
+          <span class="spinner" aria-hidden="true"></span><span>Loading projects…</span>
+        </div>
+        <div id="project-grid" class="project-grid" aria-live="polite"></div>
+        <nav id="pagination" class="pagination" aria-label="Projects pagination"></nav>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer"><div class="container footer-content"><p>&copy; <span data-current-year></span> Alex Developer</p><nav aria-label="Footer navigation"><a href="about.html">About</a><a href="projects.html">Projects</a><a href="contact.html">Contact</a></nav></div></footer>
+</body>
+</html>

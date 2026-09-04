@@ -1,0 +1,98 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta
+      name="description"
+      content="Learn about Hanz, a student web developer."
+    />
+    <title>About Me | Hanz Regalado</title>
+    <link rel="stylesheet" href="styles.css" />
+    <script src="script.js" defer></script>
+  </head>
+  <body>
+    <a class="skip-link" href="#main-content">Skip to main content</a>
+    <header class="site-header">
+      <nav class="container navbar" aria-label="Main navigation">
+        <a class="brand" href="index.html" aria-label="Alex Developer home"
+          >DHR<span>.</span></a
+        >
+        <button
+          class="nav-toggle"
+          type="button"
+          aria-expanded="false"
+          aria-controls="primary-menu"
+        >
+          <span class="sr-only">Toggle navigation</span
+          ><span aria-hidden="true">☰</span>
+        </button>
+        <ul id="primary-menu" class="nav-links">
+          <li><a href="index.html">Home</a></li>
+          <li><a href="about.html" aria-current="page">About Me</a></li>
+          <li><a href="projects.html">Projects</a></li>
+          <li><a href="contact.html">Contact</a></li>
+        </ul>
+      </nav>
+    </header>
+
+    <main id="main-content">
+      <section class="page-heading">
+        <div class="container">
+          <p class="eyebrow">About me</p>
+          <h1>Curious by nature.<br />Creative by practice.</h1>
+        </div>
+      </section>
+      <section class="section">
+        <div class="container about-grid">
+          <figure class="profile-visual">
+            <img
+              src="hanz.jpg"
+              alt="Portrait of Hanz wearing a blue collared shirt"
+            />
+          </figure>
+          <article>
+            <h2>My Story</h2>
+
+            <p>
+              I’m Hanz, a Full Stack Developer who enjoys building practical and
+              reliable web applications. I have experience working on both
+              frontend and backend systems using technologies such as Next.js,
+              NestJS, and Prisma.
+            </p>
+
+            <p>
+              I enjoy solving problems, designing clean APIs, working with
+              databases, and building user-friendly interfaces. I’m continuously
+              improving my skills in backend development, system design, and
+              modern web technologies.
+            </p>
+
+            <h2>Skills</h2>
+
+            <ul class="skill-list" aria-label="Technical skills">
+              <li>JavaScript</li>
+              <li>TypeScript</li>
+              <li>Next.js</li>
+              <li>NestJS</li>
+              <li>Prisma</li>
+              <li>PostgreSQL</li>
+              <li>Tailwind CSS</li>
+              <li>Git & GitHub</li>
+            </ul>
+          </article>
+        </div>
+      </section>
+    </main>
+
+    <footer class="site-footer">
+      <div class="container footer-content">
+        <p>&copy; <span data-current-year></span> Alex Developer</p>
+        <nav aria-label="Footer navigation">
+          <a href="about.html">About</a><a href="projects.html">Projects</a
+          ><a href="contact.html">Contact</a>
+        </nav>
+      </div>
+    </footer>
+  </body>
+</html>
